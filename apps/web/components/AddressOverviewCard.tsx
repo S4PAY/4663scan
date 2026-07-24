@@ -22,7 +22,14 @@ export async function AddressOverviewCard({
   }
 
   return (
-    <div className="card overflow-hidden">
+    // glass-panel: the address page's one elevated card (M11 depth tier).
+    // The other two (More Info, Contract & Verification) stay plain .card —
+    // More Info carries a ticking <Age> (see globals.css's .glass comment)
+    // and both are within the blur budget's remaining headroom either way.
+    // The nested holdings list below stays .card (flat, not blurred) —
+    // nesting a flat panel inside this one is fine, nesting another
+    // backdrop-filter layer inside it would not be.
+    <div className="glass-panel overflow-hidden">
       <h2 className="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-muted">
         Overview
       </h2>

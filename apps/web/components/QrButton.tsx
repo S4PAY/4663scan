@@ -57,7 +57,9 @@ export function QrButton({ value }: { value: string }) {
         ▦
       </button>
       {open && (
-        <div className="card absolute right-0 top-full z-20 mt-1.5 flex w-[212px] flex-col items-center gap-1.5 p-3">
+        // glass-panel, not .card: a transient, user-triggered overlay,
+        // never nested inside another blurred element (see globals.css).
+        <div className="glass-panel absolute right-0 top-full z-20 mt-1.5 flex w-[212px] flex-col items-center gap-1.5 p-3">
           <canvas ref={canvasRef} width={176} height={176} className="bg-[#ededee]" />
           <span className="max-w-full break-all text-center font-mono text-[10px] text-muted">
             {value}

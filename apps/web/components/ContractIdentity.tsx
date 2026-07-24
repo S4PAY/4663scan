@@ -8,6 +8,10 @@ import { TokenLink } from './links';
  * The "Contract & verification" card (M10). Creator/creation-tx moved to
  * AddressMoreInfoCard — this card is specifically about verification
  * status now, not general identity.
+ *
+ * Plain .card, not .glass-panel (M11): a .detail list like AddressMoreInfoCard's
+ * — see that component's comment and globals.css's .glass-panel comment for
+ * why the address page's elevated tier is the Overview card alone.
  */
 export function ContractIdentity({ info }: { info: ContractInfo }) {
   const { source, proxy } = info;

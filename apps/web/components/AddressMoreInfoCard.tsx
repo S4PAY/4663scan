@@ -148,6 +148,10 @@ export function AddressMoreInfoCard({
   const labels = [...labelMap.values()];
 
   return (
+    // Deliberately plain .card, not .glass-panel (M11): this card carries a
+    // ticking <Age> (last/first activity), and a backdrop-filter panel
+    // redoes its blur sample on every tick — same reason DetailList stays
+    // .card. See globals.css's .glass-panel comment for the full tiering.
     <div className="card overflow-hidden">
       <h2 className="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-muted">
         More info

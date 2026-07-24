@@ -62,7 +62,9 @@ function Sparkline({ points, rising }: { points: number[]; rising: boolean }) {
  * /price-feed route (see app/price-feed/route.ts — deliberately not under
  * /api/, which production Caddy proxies straight to the backend API), which
  * owns the actual CoinGecko call and its caching; this component just polls
- * that cache once per mount.
+ * that cache once per mount. Glass tier (M11): static once mounted, no
+ * ticking children, so it's safe as one of the ~4 budgeted backdrop-filter
+ * layers alongside the header.
  */
 export function PriceStrip() {
   const [data, setData] = useState<PriceData | null>(null);
@@ -88,7 +90,7 @@ export function PriceStrip() {
   const positive = change == null || change >= 0;
 
   return (
-    <div className="border-b border-border bg-bg/60">
+    <div className="glass border-b">
       <div className="mx-auto flex max-w-5xl items-center gap-2 overflow-hidden px-4 py-1.5 text-xs">
         <span className="badge shrink-0">ETH · Gas Token</span>
         <span className="mono shrink-0 font-medium text-text">
