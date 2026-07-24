@@ -1,12 +1,22 @@
 @import 'tailwindcss';
 
 /*
- * 4663scan brand system (M3a): neon chartreuse on near-black, angular
- * glassmorphism. Neon (#CCFF00) is reserved for accents, data highlights and
- * interactive/live states — never body copy. Corners are sharp with a
- * diagonal accent stripe (feather-mark angularity), never soft-rounded or
- * true clip-path (see .card). backdrop-filter is budgeted to the sticky
- * header only — no panel with SSE- or timer-driven children (see .glass).
+ * 4663scan brand system (M3a, glass depth added M11/M11b): neon chartreuse
+ * on near-black, angular glassmorphism. Neon (#CCFF00) is reserved for
+ * accents, data highlights and interactive/live states — never body copy.
+ * Corners are sharp with a diagonal accent stripe (feather-mark
+ * angularity), never soft-rounded or true clip-path (see .card).
+ *
+ * Two distinct glass techniques, not one:
+ * - Real blur (.glass, .glass-panel): backdrop-filter, budgeted to exactly
+ *   4 elements sitewide (header, price strip, the address page's Overview
+ *   card, the QR popover) — every one static/non-ticking, since a blurred
+ *   panel with an SSE- or timer-driven child redoes its blur sample on
+ *   every tick. Never add more without re-checking that budget.
+ * - "Fake glass" (.card, .stat-tile, mobile .dt rows): a top-sheen
+ *   gradient + lift/highlight box-shadow, zero backdrop-filter — pure
+ *   paint, safe anywhere including the live feed and every list row. This
+ *   is the sitewide default; real blur is the rare exception.
  */
 
 @theme {
@@ -35,13 +45,19 @@
   body {
     @apply bg-bg font-sans text-[14px] text-text antialiased;
   }
-  /* Ambient field (M11): what the glass panels diffuse. Two fixed, static
-     layers — costs two composites, no repaints, no layout impact (inset:0 +
-     pointer-events:none). Deliberately subtle: a screenshot should still
-     read as near-black. Contrast against text was re-verified against the
-     worst-case composite (all four blobs peaking at once, which won't
-     actually happen given their spread positions) — comfortably >14:1, see
-     the M11 commit for the exact numbers. */
+  /* Ambient field (M11, turned up in M11b — the M11 version was so subtle
+     it read as flat black). Four fixed, static layers — costs one extra
+     composite over M11, no repaints, no layout impact (inset:0 +
+     pointer-events:none). One signature accent-tinted glow (top right,
+     the brightest thing here) plus three larger charcoal blobs for depth —
+     "not neon soup": everything except that one glow stays neutral. All
+     positions land within 0-100% of the viewport (position:fixed sizes
+     this to the viewport itself, so anything outside that range is
+     permanently off-screen no matter how far the page scrolls — M11's
+     820px-blob at y:108% was almost entirely wasted for exactly this
+     reason). Contrast re-verified against the new worst-case composite
+     (all four peaking at once, which still won't actually happen given
+     their spread positions) — see the M11b commit for the exact numbers. */
   body::before {
     content: '';
     position: fixed;
@@ -50,24 +66,24 @@
     pointer-events: none;
     background:
       radial-gradient(
-        640px 420px at 88% -8%,
-        color-mix(in srgb, var(--color-accent) 8%, transparent),
+        1100px 780px at 85% 2%,
+        color-mix(in srgb, var(--color-accent) 16%, transparent),
         transparent 70%
       ),
       radial-gradient(
-        900px 640px at -18% 42%,
-        color-mix(in srgb, var(--color-accent) 5%, transparent),
-        transparent 70%
+        1000px 780px at 8% 32%,
+        color-mix(in srgb, var(--color-raised) 70%, transparent),
+        transparent 72%
       ),
       radial-gradient(
-        820px 600px at 65% 108%,
-        color-mix(in srgb, var(--color-raised) 55%, transparent),
+        900px 680px at 82% 78%,
+        color-mix(in srgb, var(--color-raised) 60%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        950px 620px at 38% 68%,
+        color-mix(in srgb, var(--color-raised) 50%, transparent),
         transparent 75%
-      ),
-      radial-gradient(
-        700px 520px at 6% 96%,
-        color-mix(in srgb, var(--color-accent) 4%, transparent),
-        transparent 70%
       );
   }
   /* Faint grain to break up banding on the soft gradients above — a tiny
@@ -127,7 +143,20 @@
      clip-path, which clips whatever paints outside the border box (focus
      outlines, box-shadow glow included) and leaves the cut edge unbordered.
      No blur here — .card alone is cheap and safe anywhere, including around
-     the live feed. */
+     the live feed.
+
+     "Fake glass" fill (M11b): a top-to-bottom white sheen layer (peaks at
+     8% right under the top edge, gone by 55% down) plus a box-shadow pair
+     — an outer drop shadow for lift off the ambient background, and an
+     inset top-edge highlight line — with zero backdrop-filter. This is
+     pure paint: no dependency on what's behind the element, so it costs
+     nothing extra during the live feed's transform/opacity FLIP animation
+     (the compositor moves the already-painted bitmap; it never needs to
+     resample this background), unlike real blur. Contrast re-verified at
+     the sheen's peak (where a card's first line of text usually sits)
+     against the worst-case ambient composite — muted text 6.23:1, comfortably
+     clear of the 4.5:1 AA floor; see the M11b commit for the exact numbers
+     and the failure threshold found while tuning this. */
   .card {
     position: relative;
     border: 1px solid color-mix(in srgb, var(--color-accent) 11%, var(--color-border));
@@ -140,7 +169,15 @@
           transparent calc(50% + 1px)
         )
         top right / 16px 16px no-repeat,
-      color-mix(in srgb, var(--color-surface) 88%, transparent);
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, white 8%, transparent),
+        transparent 55%
+      ),
+      color-mix(in srgb, var(--color-surface) 85%, transparent);
+    box-shadow:
+      0 6px 16px -6px color-mix(in srgb, black 50%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
   }
 
   /* Glass upgrade for genuinely static bars — the sticky header and the
@@ -217,6 +254,14 @@
     box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 20%, transparent);
   }
 
+  /* Hero stat tile (M11b) — the strongest fake-glass treatment on the
+     site: a brighter top sheen (12%, vs .card's 8%) and an added soft
+     accent-colored glow alongside the same lift shadow, still zero
+     backdrop-filter. This is the tuned CEILING, not just a nudge — 12% was
+     chosen after 16% pushed muted dt-label text on the sheen to 4.44:1,
+     just under the 4.5:1 AA floor at the worst-case ambient composite; 12%
+     lands at 5.15:1 with real margin. Don't raise the sheen without
+     re-running the check (see the M11b commit for the numbers). */
   .stat-tile {
     position: relative;
     /* Grid items default to a content-based min-width, which a nowrap
@@ -233,7 +278,16 @@
           transparent calc(50% + 1px)
         )
         top right / 16px 16px no-repeat,
-      color-mix(in srgb, var(--color-surface) 88%, transparent);
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, white 12%, transparent),
+        transparent 60%
+      ),
+      color-mix(in srgb, var(--color-surface) 85%, transparent);
+    box-shadow:
+      0 8px 22px -6px color-mix(in srgb, black 55%, transparent),
+      0 0 22px -8px color-mix(in srgb, var(--color-accent) 30%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-accent) 18%, white 82%);
     @apply px-3 py-2.5;
   }
   .stat-tile dt {
@@ -364,6 +418,9 @@
     margin-bottom: 8px;
     padding: 8px 12px;
     border: 1px solid color-mix(in srgb, var(--color-accent) 11%, var(--color-border));
+    /* Same fake-glass fill as .card (see its comment) — kept as its own
+       copy rather than composed, matching how this block already
+       duplicated .card's pre-M11b recipe verbatim. */
     background:
       linear-gradient(
           45deg,
@@ -373,7 +430,15 @@
           transparent calc(50% + 1px)
         )
         top right / 12px 12px no-repeat,
-      color-mix(in srgb, var(--color-surface) 88%, transparent);
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, white 8%, transparent),
+        transparent 55%
+      ),
+      color-mix(in srgb, var(--color-surface) 85%, transparent);
+    box-shadow:
+      0 6px 16px -6px color-mix(in srgb, black 50%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
   }
   .dt tbody tr:last-child {
     margin-bottom: 0;
