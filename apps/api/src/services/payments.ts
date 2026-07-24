@@ -26,7 +26,7 @@ function requiredRawAmount(priceUsd: string, decimals: number): bigint {
 }
 
 export function makePayments(ctx: AppContext, cold: Cold) {
-  function requireConfigured(): { treasury: string; token: string } {
+  function requireConfigured(): { treasury: string; treasuryDisplay: string; token: string } {
     if (!ctx.env.TREASURY_ADDRESS) {
       throw new ApiHttpError(
         503,
@@ -34,7 +34,12 @@ export function makePayments(ctx: AppContext, cold: Cold) {
       );
     }
     return {
+      // Lowercased: matches the hexBytea/ingest convention that transfer
+      // `to` values are always compared against — see verifyPayment.
       treasury: ctx.env.TREASURY_ADDRESS.toLowerCase(),
+      // Exactly as configured (preserves EIP-55 checksum casing) — this is
+      // what a payer is shown and copies, never the lowercased form.
+      treasuryDisplay: ctx.env.TREASURY_ADDRESS,
       token: ctx.env.PAYMENT_TOKEN_ADDRESS.toLowerCase(),
     };
   }
@@ -76,13 +81,13 @@ export function makePayments(ctx: AppContext, cold: Cold) {
   }
 
   async function paymentView(id: number, token: string): Promise<PaymentView> {
-    const { treasury, token: assetAddress } = requireConfigured();
+    const { treasuryDisplay, token: assetAddress } = requireConfigured();
     const row = await requireRow(id, token);
     const decimals = ctx.env.PAYMENT_TOKEN_DECIMALS;
     const amountRaw = requiredRawAmount(row.priceQuotedUsd, decimals);
     return {
       status: row.status,
-      treasuryAddress: treasury,
+      treasuryAddress: treasuryDisplay,
       asset: ctx.env.PAYMENT_TOKEN_SYMBOL,
       assetAddress,
       priceQuotedUsd: row.priceQuotedUsd,

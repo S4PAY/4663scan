@@ -44,10 +44,8 @@ export default async function SubmitTokenPage() {
             puts your submission in the review queue, nothing more.
           </li>
           <li>
-            <span className="text-amber">Refund policy:</span>{' '}
-            <span className="text-amber">
-              [OPERATOR: insert refund policy wording here before launch]
-            </span>
+            <span className="text-text">Refund policy:</span> Payment covers manual
+            review, not approval, and is non-refundable.
           </li>
         </ul>
       </div>
