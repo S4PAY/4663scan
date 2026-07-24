@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { addressLabels, tokenTransfers, transactions } from '@4663scan/shared/db/schema';
 import { hexToBuf } from '@4663scan/shared/db/hex-bytea';
 import type {
@@ -12,7 +12,7 @@ import type {
 import type { AppContext } from '../context.js';
 import type { Services } from '../services/index.js';
 import { setCache } from '../lib/cache.js';
-import { parseLimit, parsePairCursor, requireAddress, rowLt } from '../lib/params.js';
+import { parseLimit, parsePairCursor, parseSort, requireAddress, rowGt, rowLt } from '../lib/params.js';
 import { withTimeout } from '../lib/timeout.js';
 
 const TX_COUNT_CAP = 10_001; // sentinel: the web renders it as "10k+"
@@ -20,8 +20,8 @@ const TX_COUNT_CAP = 10_001; // sentinel: the web renders it as "10k+"
 const LIVE_RPC_TIMEOUT_MS = 2_500;
 const HOLDINGS_TIMEOUT_MS = 5_000;
 
-/** Merge keyset streams: de-dupe, sort desc, page to `limit`. */
-function mergeDesc<T>(
+/** Merge keyset streams: de-dupe, sort by `cmp`, page to `limit`. */
+function mergePage<T>(
   lists: T[][],
   key: (t: T) => string,
   cmp: (x: T, y: T) => number,
@@ -109,6 +109,15 @@ export function registerAddressRoutes(
     const address = requireAddress(req.params.address);
     const limit = parseLimit(req.query.limit);
     const cursor = parsePairCursor(req.query.cursor);
+    // 'asc' exists solely so the web can cheaply ask for this address's
+    // OLDEST indexed activity (limit=1&sort=asc) for "first activity" /
+    // "funded by" — same query, same indexes, just walked from the other
+    // end; no new data model or RPC pattern, just the existing rows in
+    // reverse. Pagination continuity across a sort change isn't a goal —
+    // callers doing that would need to restart from cursor=null anyway.
+    const sort = parseSort(req.query.sort);
+    const dir = sort === 'asc' ? asc : desc;
+    const rowCmp = sort === 'asc' ? rowGt : rowLt;
 
     const side = (
       col:
@@ -122,12 +131,10 @@ export function registerAddressRoutes(
         .where(
           and(
             eq(col, address),
-            cursor
-              ? rowLt(transactions.blockNumber, transactions.txIndex, cursor)
-              : undefined,
+            cursor ? rowCmp(transactions.blockNumber, transactions.txIndex, cursor) : undefined,
           ),
         )
-        .orderBy(desc(transactions.blockNumber), desc(transactions.txIndex))
+        .orderBy(dir(transactions.blockNumber), dir(transactions.txIndex))
         .limit(limit + 1);
 
     // Third side: the tx that deployed this contract (to is null there, so
@@ -137,10 +144,14 @@ export function registerAddressRoutes(
       side(transactions.to),
       side(transactions.contractAddress),
     ]);
-    const { page, hasMore } = mergeDesc(
+    // Base expression sorts descending; flip its sign for ascending —
+    // verified against the original (pre-sort-param) comparator, which was
+    // exactly this expression with an implicit sign of +1.
+    const sign = sort === 'asc' ? -1 : 1;
+    const { page, hasMore } = mergePage(
       [fromRows, toRows, createdRows],
       (t) => t.hash,
-      (x, y) => y.blockNumber - x.blockNumber || y.txIndex - x.txIndex,
+      (x, y) => sign * (y.blockNumber - x.blockNumber || y.txIndex - x.txIndex),
       limit,
     );
     const items = await s.views.toTxSummaries(page);
@@ -177,7 +188,7 @@ export function registerAddressRoutes(
       side(tokenTransfers.from),
       side(tokenTransfers.to),
     ]);
-    const { page, hasMore } = mergeDesc(
+    const { page, hasMore } = mergePage(
       [fromRows, toRows],
       (t) => `${t.blockNumber}_${t.logIndex}`,
       (x, y) => y.blockNumber - x.blockNumber || y.logIndex - x.logIndex,

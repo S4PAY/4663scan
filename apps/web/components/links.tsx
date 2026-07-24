@@ -4,7 +4,11 @@ import type { ReactNode } from 'react';
 
 export function TxLink({ hash, full = false }: { hash: string; full?: boolean }) {
   return (
-    <Link href={`/tx/${hash.toLowerCase()}`} className="hashlink" title={hash}>
+    <Link
+      href={`/tx/${hash.toLowerCase()}`}
+      className={`hashlink ${full ? 'break-all' : ''}`}
+      title={hash}
+    >
       {full ? hash : shortHash(hash)}
     </Link>
   );

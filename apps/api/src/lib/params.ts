@@ -35,6 +35,12 @@ export function parseOffsetCursor(raw: unknown): number {
   return parseNumberCursor(raw) ?? 0;
 }
 
+export function parseSort(raw: unknown): 'asc' | 'desc' {
+  if (raw === undefined || raw === 'desc') return 'desc';
+  if (raw === 'asc') return 'asc';
+  throw badRequest('invalid sort');
+}
+
 export function requireAddress(raw: string): string {
   const a = raw.toLowerCase();
   if (!/^0x[0-9a-f]{40}$/.test(a)) throw badRequest('invalid address');

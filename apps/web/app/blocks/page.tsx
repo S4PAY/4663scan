@@ -15,6 +15,7 @@ import {
 import { Age } from '@/components/Age';
 import { DataTable, EmptyState, Td } from '@/components/DataTable';
 import { LoadMore } from '@/components/LoadMore';
+import { MobileCard, MobileList } from '@/components/MobileRow';
 import { BlockLink } from '@/components/links';
 import { apiGet, isClientError } from '@/lib/api';
 import { firstParam } from '@/lib/params';
@@ -49,6 +50,50 @@ function BlockRow({ b }: { b: BlockSummary }) {
         )}
       </Td>
     </tr>
+  );
+}
+
+/** Mobile: line 1 block + age; line 2 tx count + gas%; line 3 base fee. */
+function BlockMobileCard({ b }: { b: BlockSummary }) {
+  return (
+    <MobileCard>
+      <div className="flex min-w-0 items-center gap-1.5">
+        <BlockLink number={b.number} />
+        <span className="ml-auto shrink-0">
+          <Age timestamp={b.timestamp} />
+        </span>
+      </div>
+      <div className="mt-1 flex items-center gap-1.5 text-muted">
+        <span>{b.txCount} txs</span>
+        <span>·</span>
+        <span className="mono">{groupThousands(String(b.gasUsed))} gas</span>
+        <span className="text-xs">({gasPercent(b.gasUsed, EXECUTION_GAS_LIMIT)})</span>
+      </div>
+      {b.baseFeePerGas != null && (
+        <div className="mt-1 mono text-muted">
+          {formatGwei(b.baseFeePerGas)} <span className="text-xs">gwei base fee</span>
+        </div>
+      )}
+    </MobileCard>
+  );
+}
+
+function BlockList({ items }: { items: BlockSummary[] }) {
+  return (
+    <>
+      <div className="hidden sm:block">
+        <DataTable head={HEAD}>
+          {items.map((b) => (
+            <BlockRow key={b.number} b={b} />
+          ))}
+        </DataTable>
+      </div>
+      <MobileList>
+        {items.map((b) => (
+          <BlockMobileCard key={b.number} b={b} />
+        ))}
+      </MobileList>
+    </>
   );
 }
 
@@ -100,11 +145,7 @@ export default async function BlocksPage({
         {feed.blocks.length === 0 ? (
           <EmptyState>No blocks available.</EmptyState>
         ) : (
-          <DataTable head={HEAD}>
-            {feed.blocks.map((b) => (
-              <BlockRow key={b.number} b={b} />
-            ))}
-          </DataTable>
+          <BlockList items={feed.blocks} />
         )}
         {status != null && oldestLive != null && (
           <p className="mt-3 text-xs text-muted">
@@ -137,11 +178,7 @@ export default async function BlocksPage({
       {page.items.length === 0 ? (
         <EmptyState>No blocks indexed yet.</EmptyState>
       ) : (
-        <DataTable head={HEAD}>
-          {page.items.map((b) => (
-            <BlockRow key={b.number} b={b} />
-          ))}
-        </DataTable>
+        <BlockList items={page.items} />
       )}
       <LoadMore basePath="/blocks" cursor={page.nextCursor} />
     </div>

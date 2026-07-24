@@ -11,25 +11,22 @@ import type {
   TokenTransferView,
   TxSummary,
 } from '@4663scan/shared/api-types';
-import {
-  checksum,
-  formatEth,
-  groupThousands,
-  isAddress,
-  shortAddress,
-} from '@4663scan/shared/format';
+import { checksum, isAddress, shortAddress } from '@4663scan/shared/format';
+import { AddressMoreInfoCard } from '@/components/AddressMoreInfoCard';
+import { AddressOverviewCard } from '@/components/AddressOverviewCard';
 import { CopyButton } from '@/components/CopyButton';
+import { QrButton } from '@/components/QrButton';
 import { StockBadge } from '@/components/badges';
 import { ContractCodeTab } from '@/components/ContractCodeTab';
 import { ContractEventsTab } from '@/components/ContractEventsTab';
 import { ContractIdentity } from '@/components/ContractIdentity';
 import { ContractReadTab } from '@/components/ContractReadTab';
 import { EmptyState } from '@/components/DataTable';
+import { HoldingsList, HoldingsUnavailable } from '@/components/HoldingsList';
 import { LoadMore } from '@/components/LoadMore';
 import { TokenLink } from '@/components/links';
 import { TransferTable } from '@/components/TransferTable';
 import { TxTable } from '@/components/TxTable';
-import { TokenAmount } from '@/components/values';
 import { apiGet, isClientError } from '@/lib/api';
 import { firstParam } from '@/lib/params';
 
@@ -53,9 +50,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { address } = await params;
   return { title: `Address ${shortAddress(checksum(address))}` };
 }
-
-/** The indexed tx count is capped upstream; render 10k+ at the cap. */
-const TX_COUNT_CAP = 10_000;
 
 const TAB_LABELS: Record<Tab, string> = {
   txs: 'Transactions',
@@ -103,62 +97,66 @@ export default async function AddressPage({ params, searchParams }: Props) {
   const tab: Tab = tabs.includes(tabParam as Tab) ? (tabParam as Tab) : 'txs';
 
   const checksummed = checksum(address);
+  const isStock = summary.token?.isStockToken || contract?.token?.isStockToken;
+  // summary.labels and contract.labels read the same table from different
+  // routes and can legitimately overlap — de-dupe for the header chip row.
+  const labelMap = new Map(
+    [...summary.labels, ...(contract?.labels ?? [])].map((l) => [l.label, l]),
+  );
+  const labels = [...labelMap.values()];
 
   return (
     <div>
+      {/* HEADER ROW */}
       <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
         <h1 className="text-lg font-semibold">Address</h1>
-        <span className="mono break-all text-[13px]">{checksummed}</span>
+        {/* Full address on desktop; middle-ellipsis on mobile instead of
+            letting a 42-char mono string wrap across lines (M10 Part 1). */}
+        <span className="mono hidden break-all text-[13px] sm:inline">{checksummed}</span>
+        <span className="mono text-[13px] sm:hidden">{shortAddress(checksummed)}</span>
         <CopyButton text={checksummed} />
+        <QrButton value={checksummed} />
       </div>
-      {!contract && (
-        <div className="mb-4 flex flex-wrap items-center gap-1.5">
-          {summary.isContract && <span className="badge">Contract</span>}
-          {summary.labels.map((l) => (
-            <span key={l.label} className="badge" title={l.category}>
-              {l.label}
+
+      <div className="mb-4 flex flex-wrap items-center gap-1.5">
+        {summary.isContract && <span className="badge">Contract</span>}
+        {contract && (
+          <span className={`badge ${contract.source.verified ? 'badge-green' : ''}`}>
+            {contract.source.verified ? 'Verified' : 'Unverified'}
+          </span>
+        )}
+        {summary.token && (
+          <TokenLink address={summary.token.address}>
+            <span className="badge badge-green">
+              Token{summary.token.symbol ? `: ${summary.token.symbol}` : ''}
             </span>
-          ))}
-          {summary.token && (
-            <TokenLink address={summary.token.address}>
-              <span className="badge badge-green">
-                Token{summary.token.symbol ? `: ${summary.token.symbol}` : ''}
-              </span>
-            </TokenLink>
-          )}
-          {summary.token?.isStockToken && <StockBadge />}
-        </div>
-      )}
+          </TokenLink>
+        )}
+        {isStock && <StockBadge />}
+        {labels.map((l) => (
+          <span key={l.label} className="badge" title={l.category}>
+            {l.label}
+          </span>
+        ))}
+      </div>
 
-      <dl className="mb-5 grid grid-cols-2 gap-2 sm:max-w-md">
-        <div className="stat-tile">
-          <dt>ETH balance</dt>
-          <dd>
-            {summary.balanceWei != null ? (
-              formatEth(summary.balanceWei)
-            ) : (
-              <span className="text-muted">—</span>
-            )}
-          </dd>
-        </div>
-        <div className="stat-tile">
-          <dt>Indexed txs</dt>
-          <dd>
-            {summary.indexedTxCount >= TX_COUNT_CAP
-              ? '10k+'
-              : groupThousands(String(summary.indexedTxCount))}
-          </dd>
-        </div>
-      </dl>
+      {/* THREE CARDS — side-by-side desktop, stacked mobile. EOAs drop the
+          verification card and the other two span instead (charter Part 1).
+          A future labeled ad slot could sit right after this grid without
+          touching it — deliberately not built here (guardrail: no ad UI). */}
+      <div className={`grid gap-3 ${contract ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
+        <AddressOverviewCard address={address} balanceWei={summary.balanceWei} />
+        <AddressMoreInfoCard address={address} summary={summary} contract={contract} />
+        {contract && <ContractIdentity info={contract} />}
+      </div>
 
-      {contract && <ContractIdentity info={contract} />}
-
-      <nav className="mb-3 flex gap-1 border-b border-border">
+      {/* TABS — one scrollable row, never wraps, per charter Part 1. */}
+      <nav className="mb-3 mt-5 flex flex-nowrap gap-1 overflow-x-auto border-b border-border">
         {tabs.map((t) => (
           <Link
             key={t}
             href={t === 'txs' ? `/address/${address}` : `/address/${address}?tab=${t}`}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
+            className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm transition-colors ${
               tab === t
                 ? 'border-accent text-text'
                 : 'border-transparent text-muted hover:text-accent'
@@ -263,35 +261,14 @@ async function TransfersTab({ address, cursorQs }: { address: string; cursorQs: 
 }
 
 async function HoldingsTab({ address }: { address: string }) {
-  const { items, degraded } = await apiGet<HoldingsResponse>(
-    `/addresses/${address}/tokens`,
-    { revalidate: 1 },
-  );
-  if (degraded) {
-    return (
-      <EmptyState>
-        Live balance lookup is temporarily unavailable — refresh to retry.
-      </EmptyState>
-    );
+  let holdings: HoldingsResponse;
+  try {
+    holdings = await apiGet<HoldingsResponse>(`/addresses/${address}/tokens`, {
+      revalidate: 1,
+    });
+  } catch {
+    return <HoldingsUnavailable />;
   }
-  if (items.length === 0) {
-    return <EmptyState>No token holdings found.</EmptyState>;
-  }
-  return (
-    <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((h) => (
-        <li key={h.token.address} className="card px-3 py-2.5">
-          <div className="flex items-center gap-1.5">
-            <span className="min-w-0 truncate">
-              <TokenAmount value={h.balance} token={h.token} />
-            </span>
-            {h.token.isStockToken && <StockBadge />}
-          </div>
-          <div className="mt-0.5 truncate text-xs text-muted">
-            {h.token.name ?? h.token.address}
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
+  if (holdings.degraded) return <HoldingsUnavailable />;
+  return <HoldingsList items={holdings.items} />;
 }
