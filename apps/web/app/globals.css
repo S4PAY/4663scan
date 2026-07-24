@@ -184,9 +184,22 @@
      price strip. NEVER apply to an element with a child that repaints on a
      timer or via SSE: a ticking <Age> inside a backdrop-filter panel forces
      the blur to redo its sample on every tick (measured on DetailList, which
-     is why it stays plain .card, not .glass — see M3a review). */
+     is why it stays plain .card, not .glass — see M3a review).
+
+     Background opacity bumped 72% -> 92% (found live, on the sticky
+     header specifically): blur alone doesn't guarantee legibility — bright
+     content scrolling underneath a STICKY element keeps passing behind it
+     continuously, and 28% see-through was enough for scrolled text/card
+     edges to visibly ghost through and overlap the header's own logo/nav
+     text, worse after M11b's brighter card treatment gave scrolled content
+     more contrast to bleed through with. 92% keeps the blur's frosted
+     character for the sliver that's still translucent while making the
+     header and price strip effectively opaque — contrast only improves
+     versus the already-comfortable 72% numbers (closer to .card's own
+     85%, already verified >12:1), so this needed no re-check in that
+     direction, only the legibility-through-blur problem itself. */
   .glass {
-    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
     backdrop-filter: blur(14px) saturate(1.15);
     -webkit-backdrop-filter: blur(14px) saturate(1.15);
     border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-border));

@@ -6,8 +6,6 @@ export const metadata: Metadata = {
   description: 'Placements and audience for advertising on 4663scan.',
 };
 
-const CONTACT_EMAIL = 'ads@4663scan.io';
-
 const PLACEMENTS = [
   {
     name: 'Footer placement',
@@ -59,11 +57,17 @@ export default function AdvertisePage() {
 
       <SectionTitle>Get in touch</SectionTitle>
       <p className="text-[13px] text-muted">
-        Email{' '}
-        <a href={`mailto:${CONTACT_EMAIL}`} className="hashlink">
-          {CONTACT_EMAIL}
+        DM us on X —{' '}
+        <a
+          href="https://x.com/4663scan"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hashlink"
+        >
+          x.com/4663scan
         </a>{' '}
-        with what you&apos;re looking for — we&apos;ll reply with pricing and availability.
+        — with what you&apos;re looking for and we&apos;ll reply with pricing and
+        availability.
       </p>
     </div>
   );
