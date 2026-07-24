@@ -1,0 +1,41 @@
+{
+  "name": "@4663scan/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.ts",
+    "./chain": "./src/chain.ts",
+    "./db": "./src/db/index.ts",
+    "./db/schema": "./src/db/schema.ts",
+    "./db/hex-bytea": "./src/db/hex-bytea.ts",
+    "./db/partitions": "./src/db/partitions.ts",
+    "./tiering": "./src/tiering.ts",
+    "./ingest": "./src/ingest.ts",
+    "./abi": "./src/abi/index.ts",
+    "./format": "./src/format.ts",
+    "./api-types": "./src/api-types.ts",
+    "./labels.json": "./src/labels.json",
+    "./stock-registry.json": "./src/stock-registry.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/db/seed.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9",
+    "viem": "^2.55.4",
+    "zod": "^4.4.3",
+    "dotenv": "^17.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.1",
+    "typescript": "~5.9.3"
+  }
+}

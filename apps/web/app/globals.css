@@ -1,0 +1,346 @@
+@import 'tailwindcss';
+
+/*
+ * 4663scan brand system (M3a): neon chartreuse on near-black, angular
+ * glassmorphism. Neon (#CCFF00) is reserved for accents, data highlights and
+ * interactive/live states — never body copy. Corners are sharp with a
+ * diagonal accent stripe (feather-mark angularity), never soft-rounded or
+ * true clip-path (see .card). backdrop-filter is budgeted to the sticky
+ * header only — no panel with SSE- or timer-driven children (see .glass).
+ */
+
+@theme {
+  --color-bg: #0a0a0a;
+  --color-surface: #14150e;
+  --color-raised: #1b1d12;
+  --color-border: #262a1a;
+  --color-text: #edeee3;
+  --color-muted: #a0a692;
+  --color-accent: #ccff00;
+  --color-red: #ff5000;
+  --color-amber: #ffb02e;
+
+  --font-sans:
+    var(--font-sans-next), system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    var(--font-mono-next), ui-monospace, 'SF Mono', SFMono-Regular, Menlo,
+    Consolas, 'Liberation Mono', monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg font-sans text-[14px] text-text antialiased;
+  }
+  /* Ambient neon field: what the glass panels diffuse. One fixed, static
+     layer — costs a single composite, no repaints. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        640px 420px at 88% -8%,
+        color-mix(in srgb, var(--color-accent) 7%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        900px 640px at -18% 42%,
+        color-mix(in srgb, var(--color-accent) 4%, transparent),
+        transparent 70%
+      );
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+}
+
+/* Unlayered on purpose: Tailwind's cascade layers (base < components <
+   utilities) resolve by layer order, not specificity, so a :focus-visible
+   rule inside @layer base loses to ANY layered rule that also touches
+   outline — including every Tailwind `focus:outline-none` in the app (.input
+   uses it directly). Declaring this outside all layers makes it win
+   unconditionally, per the Cascade Layers spec. */
+:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+@layer components {
+  .mono {
+    @apply font-mono tabular-nums;
+  }
+
+  .hashlink {
+    @apply font-mono text-[13px] tabular-nums text-text underline-offset-2 transition-colors hover:text-accent hover:underline;
+  }
+  .hashlink:hover {
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+
+  .navlink {
+    @apply text-muted transition-colors hover:text-accent;
+  }
+  .navlink-active {
+    @apply text-text;
+  }
+
+  /* Angular panel: translucent charcoal, 1px neon-tinted border on all four
+     sides, plus a small diagonal accent line at the top-right corner (the
+     feather cut) drawn as a background-gradient stripe — deliberately NOT
+     clip-path, which clips whatever paints outside the border box (focus
+     outlines, box-shadow glow included) and leaves the cut edge unbordered.
+     No blur here — .card alone is cheap and safe anywhere, including around
+     the live feed. */
+  .card {
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 11%, var(--color-border));
+    background:
+      linear-gradient(
+          45deg,
+          transparent calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% + 1px),
+          transparent calc(50% + 1px)
+        )
+        top right / 16px 16px no-repeat,
+      color-mix(in srgb, var(--color-surface) 88%, transparent);
+  }
+
+  /* Glass upgrade for genuinely static panels — currently only the sticky
+     site header. NEVER apply to an element with a child that repaints on a
+     timer or via SSE: a ticking <Age> inside a backdrop-filter panel forces
+     the blur to redo its sample on every tick (measured on DetailList, which
+     is why it stays plain .card, not .glass — see M3a review). */
+  .glass {
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-border));
+  }
+
+  .chip {
+    @apply inline-block max-w-40 truncate border border-border bg-raised px-1.5 py-0.5 align-middle font-mono text-xs leading-4 text-muted;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 border border-border bg-raised px-1.5 py-0.5 text-xs leading-4 text-muted;
+  }
+  .badge-green {
+    @apply border-accent/40 bg-accent/10 text-accent;
+  }
+  .badge-red {
+    @apply border-red/40 bg-red/10 text-red;
+  }
+  .badge-amber {
+    @apply border-amber/40 bg-amber/10 text-amber;
+  }
+
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center border border-border bg-surface px-3 py-1.5 text-sm text-muted transition-all hover:border-accent/60 hover:text-accent;
+  }
+  .btn:hover {
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  /* Shared text-input chrome (header search, tokens filter). Focus = neon
+     border + bloom, per glow discipline. */
+  .input {
+    @apply w-full border border-border bg-surface/80 px-3 py-1.5 font-mono text-[13px] text-text placeholder:text-muted/80 focus:border-accent/60 focus:outline-none;
+  }
+  .input:focus {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+
+  .stat-tile {
+    position: relative;
+    /* Grid items default to a content-based min-width, which a nowrap
+       (truncate) dd would otherwise stretch past the grid-cols-2 track at
+       narrow widths instead of actually ellipsizing. */
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 11%, var(--color-border));
+    background:
+      linear-gradient(
+          45deg,
+          transparent calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% + 1px),
+          transparent calc(50% + 1px)
+        )
+        top right / 16px 16px no-repeat,
+      color-mix(in srgb, var(--color-surface) 88%, transparent);
+    @apply px-3 py-2.5;
+  }
+  .stat-tile dt {
+    @apply text-[11px] uppercase tracking-wider text-muted;
+  }
+  .stat-tile dd {
+    /* Data highlight: neon is allowed here (never on body copy). truncate
+       guards against a long formatted value clipping at narrow widths. */
+    @apply mt-0.5 truncate font-mono text-lg tabular-nums leading-6 text-accent;
+  }
+
+  .raw {
+    @apply max-h-72 overflow-x-auto whitespace-pre-wrap break-all border border-border bg-bg p-3 font-mono text-xs leading-5 text-muted;
+  }
+}
+
+/* ── Live pulse dot ─────────────────────────────────────────────────── */
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  animation: livepulse 1.8s ease-out infinite;
+}
+.live-dot--off {
+  background: var(--color-amber);
+  box-shadow: none;
+}
+.live-dot--off::after {
+  animation: none;
+  opacity: 0;
+}
+@keyframes livepulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(2.75);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.75);
+    opacity: 0;
+  }
+}
+
+/* ── Feed rows: FLIP list-reorder + enter transition (M3b) ───────────── */
+/* JS (FeedHome's useFlipRows) toggles transform/opacity between renders;
+   the transition itself lives here so the JS only ever sets end-state
+   values. No blur, no background-color animation — a plain translateY/
+   opacity tween is compositor-only, cheap even at the ~10-block/s cap. */
+.feed-row {
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 240ms ease-out;
+}
+
+/* ── Reduced motion: keep state changes visible, drop the animation ──── */
+@media (prefers-reduced-motion: reduce) {
+  .live-dot::after {
+    animation: none;
+  }
+  .feed-row {
+    transition: none;
+  }
+}
+
+/* ── Data tables: real table on sm+, definition-list cards on mobile ── */
+.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dt th {
+  @apply border-b border-border px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-muted;
+}
+.dt td {
+  @apply border-b border-border/60 px-3 py-2 align-middle;
+}
+.dt tbody tr {
+  transition: background-color 120ms;
+}
+.dt tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+}
+.dt tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 639px) {
+  .dt,
+  .dt tbody {
+    display: block;
+  }
+  .dt thead {
+    display: none;
+  }
+  .dt tbody tr {
+    display: block;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 11%, var(--color-border));
+    background:
+      linear-gradient(
+          45deg,
+          transparent calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% - 1px),
+          color-mix(in srgb, var(--color-accent) 45%, transparent) calc(50% + 1px),
+          transparent calc(50% + 1px)
+        )
+        top right / 12px 12px no-repeat,
+      color-mix(in srgb, var(--color-surface) 88%, transparent);
+  }
+  .dt tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .dt td {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: baseline;
+    border: 0;
+    padding: 3px 0;
+  }
+  .dt td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+  }
+}
+
+/* ── Detail definition lists (block/tx/address headers) ─────────────── */
+.detail > div {
+  @apply grid gap-y-1 border-b border-border/60 px-4 py-2.5 text-sm;
+}
+.detail > div:last-child {
+  border-bottom: 0;
+}
+.detail dt {
+  @apply text-[11px] uppercase tracking-wider text-muted;
+}
+.detail dd {
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .detail > div {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    column-gap: 16px;
+  }
+  .detail dt {
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+}

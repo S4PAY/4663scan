@@ -1,0 +1,272 @@
+[
+  {
+    "address": "0x0000000000000000000000000000000000000064",
+    "label": "ArbSys",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000000065",
+    "label": "ArbInfo",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000000066",
+    "label": "ArbAddressTable",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000006b",
+    "label": "ArbOwnerPublic",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000006c",
+    "label": "ArbGasInfo",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000006d",
+    "label": "ArbAggregator",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000006e",
+    "label": "ArbRetryableTx",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000006f",
+    "label": "ArbStatistics",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000000070",
+    "label": "ArbOwner",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x00000000000000000000000000000000000000c8",
+    "label": "NodeInterface",
+    "category": "system",
+    "source": "arbitrum-precompile"
+  },
+  {
+    "address": "0x00000000000000000000000000000000000a4b05",
+    "label": "ArbOS Internal",
+    "category": "system",
+    "source": "arbitrum-system"
+  },
+  {
+    "address": "0xca11bde05977b3631167028862be2a173976ca11",
+    "label": "Multicall3",
+    "category": "system",
+    "source": "multicall3.com"
+  },
+  {
+    "address": "0x1e324b9316138ca9a73f960213621ad1aaf01b89",
+    "label": "L2 Gateway Router",
+    "category": "bridge",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0xfd9b17206278c16ddaacf6ac8f05dbf97edcb31e",
+    "label": "L2 ERC20 Gateway",
+    "category": "bridge",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x912285144fc0f6e89d3ed16f5ab72f87a1878959",
+    "label": "L2 Custom Gateway",
+    "category": "bridge",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x1d187c3e2da52d72bc9c41e3aba0fdfa6a7bf055",
+    "label": "L2 WETH Gateway",
+    "category": "bridge",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+    "label": "WETH",
+    "category": "token",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0xa3acd31afb851b4eb9dad00f5204c01d924267df",
+    "label": "L2 Proxy Admin",
+    "category": "system",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x2cac2d899ecc914d704feaae33ac1bf36277dad1",
+    "label": "L2 Multicall",
+    "category": "system",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+    "label": "Permit2",
+    "category": "dex",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0xbc5c3a7adecf54d34169fd90dbd1b7d3142df067",
+    "label": "Network Fee Collector",
+    "category": "system",
+    "source": "ArbOwnerPublic.getNetworkFeeAccount()"
+  },
+  {
+    "address": "0x5a2b80a9b7effc06129bd5462d77bc20a8a59be7",
+    "label": "Infra Fee Collector",
+    "category": "system",
+    "source": "ArbOwnerPublic.getInfraFeeAccount()"
+  },
+  {
+    "address": "0x4783c67b63de2b358ac5951a7d41f47a38f3c046",
+    "label": "Robinhood: StockFactory",
+    "category": "issuer",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0xee351e53bce6aaf106428358838197c91e36ee0e",
+    "label": "Robinhood: StockFactory Impl",
+    "category": "issuer",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0xe10b6f6b275de231345c20d14ab812db62151b00",
+    "label": "Robinhood: AccessControlsRegistry",
+    "category": "issuer",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0xb35490d6f9163de4f80d88dc75c3516eb64c5ae2",
+    "label": "Robinhood: Stock Implementation",
+    "category": "issuer",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x074377a78a9710a1d47244f89797718b4f491279",
+    "label": "Robinhood: Deployer",
+    "category": "issuer",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+    "label": "USDG (Global Dollar)",
+    "category": "token",
+    "source": "docs.robinhood.com/chain/protocol-contracts"
+  },
+  {
+    "address": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
+    "label": "USDe (Ethena)",
+    "category": "token",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x80e0e24718dbfcad49ecaa6f1e6c89a190586ca8",
+    "label": "Bridged USDC",
+    "category": "token",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x40858070814a57fdf33a613ae84fe0a8b4a874f7",
+    "label": "syrupUSDG (Maple)",
+    "category": "token",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+    "label": "Uniswap V4: PoolManager",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x8876789976decbfcbbbe364623c63652db8c0904",
+    "label": "Uniswap: Universal Router",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x58daec3116aae6d93017baaea7749052e8a04fa7",
+    "label": "Uniswap V4: PositionManager",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x8dc178efb8111bb0973dd9d722ebeff267c98f94",
+    "label": "Uniswap V4: Quoter",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0xf3334192d15450cdd385c8b70e03f9a6bd9e673b",
+    "label": "Uniswap V4: StateView",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x1f7d7550b1b028f7571e69a784071f0205fd2efa",
+    "label": "Uniswap V3: Factory",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0xcaf681a66d020601342297493863e78c959e5cb2",
+    "label": "Uniswap V3: SwapRouter02",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x73991a25c818bf1f1128deaab1492d45638de0d3",
+    "label": "Uniswap V3: Positions NFT",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7",
+    "label": "Uniswap V3: QuoterV2",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x7dfd4f31be6814d2906bde155c3e1b146eac1468",
+    "label": "Uniswap V3: TickLens",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0x282a3c4d320cc7f0d5eaf56b8029e4b88338f0a3",
+    "label": "Uniswap: InterfaceMulticall",
+    "category": "dex",
+    "source": "developers.uniswap.org"
+  },
+  {
+    "address": "0xe23747d8c04b2101c873282c3d339d65d3d84ef0",
+    "label": "Rialto: Settlement Router",
+    "category": "dex",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x87e38f11154cffded4391e4bdbba6dfae430879d",
+    "label": "Rialto: QuotePriceGuard",
+    "category": "dex",
+    "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0xba03eb57d5f74561c96962b4c3f52ad3185e7e05",
+    "label": "Morpho",
+    "category": "other",
+    "source": "robinhoodchain.blockscout.com"
+  }
+]
