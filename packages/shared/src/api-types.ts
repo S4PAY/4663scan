@@ -277,6 +277,22 @@ export interface StockInfo {
   chainlinkFeed: string | null;
 }
 
+/**
+ * Curated project info from the most recent *approved* row in
+ * token_submissions (see docs/ops.md "Token submissions") — the same
+ * intake/payment/review pipeline any third-party listing goes through, not
+ * a per-token special case. Null unless a submission for this address has
+ * actually been reviewed and approved.
+ */
+export interface CommunityInfo {
+  projectName: string;
+  description: string | null;
+  website: string | null;
+  /** Freeform text as entered on the submission form (e.g. "X: https://…,
+   *  Telegram: https://…") — the web app auto-linkifies URLs within it. */
+  socials: string | null;
+}
+
 export interface TokenInfo {
   address: string;
   name: string | null;
@@ -285,6 +301,7 @@ export interface TokenInfo {
   type: string;
   isStockToken: boolean;
   stock: StockInfo | null;
+  community: CommunityInfo | null;
   totalSupply: string | null;
   firstSeenBlock: number | null;
   /** Count of transfers indexed (approximate, from indexed range). */

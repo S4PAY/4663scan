@@ -1,6 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import { and, asc, desc, eq, ilike, or, sql, type SQL } from 'drizzle-orm';
-import { stockTokens, tokenTransfers, tokens } from '@4663scan/shared/db/schema';
+import {
+  stockTokens,
+  tokenSubmissions,
+  tokenTransfers,
+  tokens,
+} from '@4663scan/shared/db/schema';
 import { bufToHex, hexToBuf } from '@4663scan/shared/db/hex-bytea';
 import type {
   Paginated,
@@ -121,7 +126,7 @@ export function registerTokenRoutes(
     if (!row) throw notFound();
 
     // Raw SQL bypasses the hexBytea codec: bind the bytea param as a Buffer.
-    const [countRows, holderRows] = await Promise.all([
+    const [countRows, holderRows, communityRows] = await Promise.all([
       ctx.sql<{ c: number }[]>`
         select count(*)::int as c from (
           select 1 from token_transfers where token_address = ${hexToBuf(address)}
@@ -137,12 +142,23 @@ export function registerTokenRoutes(
           select 1 from address_token_seen where token_address = ${hexToBuf(address)}
           limit ${TRANSFER_COUNT_CAP}
         ) h`,
+      // Most recent *approved* community submission, if any (docs/ops.md
+      // "Token submissions") — the same reviewed/approved row any
+      // third-party listing would go through, not a per-token special case.
+      ctx.db
+        .select()
+        .from(tokenSubmissions)
+        .where(
+          and(eq(tokenSubmissions.tokenAddress, address), eq(tokenSubmissions.status, 'approved')),
+        )
+        .orderBy(desc(tokenSubmissions.reviewedAt))
+        .limit(1),
     ]);
     const transferCount = Math.min(countRows[0]?.c ?? 0, TRANSFER_COUNT_CAP);
     const holderCount = Math.min(holderRows[0]?.c ?? 0, TRANSFER_COUNT_CAP);
 
     setCache(reply, 'short');
-    return toTokenInfo(row.token, row.stock, transferCount, holderCount);
+    return toTokenInfo(row.token, row.stock, transferCount, holderCount, communityRows[0] ?? null);
   });
 
   app.get<AddrParams>('/tokens/:address/transfers', async (req, reply) => {

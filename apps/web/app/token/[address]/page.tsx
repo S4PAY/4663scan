@@ -35,6 +35,27 @@ interface Props {
 /** The indexed transfer count is capped upstream (sentinel 100,001); render 100k+ at the cap. */
 const TRANSFER_COUNT_CAP = 100_000;
 
+/** Community-submission `socials` is freeform text (e.g. "X: https://…,
+ *  Telegram: https://…") — auto-linkify URLs within it rather than
+ *  requiring submitters to use a structured format. */
+function linkifyText(text: string) {
+  return text.split(/(https?:\/\/\S+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hashlink"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { address } = await params;
   return { title: `Token ${shortAddress(checksum(address))}` };
@@ -106,6 +127,31 @@ export default async function TokenPage({ params, searchParams }: Props) {
             )}
           </div>
         )}
+
+      {token.community && (
+        <div className="card mb-5 px-4 py-3 text-[13px]">
+          {token.community.description && (
+            <p className="text-muted">{token.community.description}</p>
+          )}
+          {(token.community.website || token.community.socials) && (
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {token.community.website && (
+                <a
+                  href={token.community.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hashlink break-all"
+                >
+                  {token.community.website}
+                </a>
+              )}
+              {token.community.socials && (
+                <span className="break-all">{linkifyText(token.community.socials)}</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center gap-x-1 gap-y-1 text-[13px]">
         <Link href={`/address/${address}`} className="hashlink break-all">
           {checksummed}

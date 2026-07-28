@@ -8,6 +8,7 @@ import type {
   BlockRow,
   StockTokenRow,
   TokenRow,
+  TokenSubmissionRow,
   TokenTransferRow,
   TxRow,
 } from '@4663scan/shared/db/schema';
@@ -42,6 +43,7 @@ export function toTokenInfo(
   stock: StockTokenRow | null,
   transferCount: number | null,
   holderCount: number | null = null,
+  community: TokenSubmissionRow | null = null,
 ): TokenInfo {
   return {
     address: row.address,
@@ -60,6 +62,14 @@ export function toTokenInfo(
           logoFetchedAt: stock.logoFetchedAt ? Math.floor(stock.logoFetchedAt.getTime() / 1000) : null,
           assetClass: stock.assetClass,
           chainlinkFeed: stock.chainlinkFeed,
+        }
+      : null,
+    community: community
+      ? {
+          projectName: community.projectName,
+          description: community.description,
+          website: community.website,
+          socials: community.socials,
         }
       : null,
     totalSupply: row.totalSupply,
