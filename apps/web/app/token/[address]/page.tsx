@@ -35,24 +35,75 @@ interface Props {
 /** The indexed transfer count is capped upstream (sentinel 100,001); render 100k+ at the cap. */
 const TRANSFER_COUNT_CAP = 100_000;
 
+interface SocialLink {
+  url: string;
+  label: string;
+}
+
+function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
 /** Community-submission `socials` is freeform text (e.g. "X: https://…,
- *  Telegram: https://…") — auto-linkify URLs within it rather than
- *  requiring submitters to use a structured format. */
-function linkifyText(text: string) {
-  return text.split(/(https?:\/\/\S+)/g).map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hashlink"
-      >
-        {part}
-      </a>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
+ *  Telegram: https://…", or just bare comma-separated URLs per the
+ *  submission form's own placeholder) — split on line/comma boundaries and
+ *  pull one URL per segment, using any text before it as a label (falling
+ *  back to the hostname when a segment is a bare URL). */
+function parseSocialLinks(text: string): SocialLink[] {
+  const links: SocialLink[] = [];
+  for (const segment of text.split(/[\n,]+/)) {
+    const match = segment.match(/https?:\/\/\S+/);
+    if (!match || match.index == null) continue;
+    const url = match[0];
+    const prefix = segment.slice(0, match.index).replace(/[:\s]+$/, '').trim();
+    links.push({ url, label: prefix || hostnameOf(url) });
+  }
+  return links;
+}
+
+/** Icon choice is by hostname/label match against known platforms, with a
+ *  generic globe fallback for anything else — so an unrecognized service
+ *  (Discord, TikTok, whatever a submitter adds next) still renders, not a
+ *  hard requirement on exactly "website/X/Telegram". */
+function socialIconKind(link: SocialLink): 'x' | 'telegram' | 'other' {
+  const host = hostnameOf(link.url);
+  const label = link.label.toLowerCase();
+  if (host === 'x.com' || host === 'twitter.com' || label === 'x' || label.includes('twitter')) {
+    return 'x';
+  }
+  if (host === 't.me' || host.endsWith('.telegram.org') || label.includes('telegram')) {
+    return 'telegram';
+  }
+  return 'other';
+}
+
+/** Matches Footer's icon treatment: fill-current SVG, no visible label text
+ *  (icons only), aria-label carries the accessible name instead. */
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-current">
+      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-current">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function TelegramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-current">
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+    </svg>
   );
 }
 
@@ -134,20 +185,40 @@ export default async function TokenPage({ params, searchParams }: Props) {
             <p className="text-muted">{token.community.description}</p>
           )}
           {(token.community.website || token.community.socials) && (
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-2 flex items-center gap-3">
               {token.community.website && (
                 <a
                   href={token.community.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hashlink break-all"
+                  aria-label="Website"
+                  className="navlink"
                 >
-                  {token.community.website}
+                  <GlobeIcon />
                 </a>
               )}
-              {token.community.socials && (
-                <span className="break-all">{linkifyText(token.community.socials)}</span>
-              )}
+              {token.community.socials &&
+                parseSocialLinks(token.community.socials).map((link) => {
+                  const kind = socialIconKind(link);
+                  return (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.label || 'Social link'}
+                      className="navlink"
+                    >
+                      {kind === 'x' ? (
+                        <XIcon />
+                      ) : kind === 'telegram' ? (
+                        <TelegramIcon />
+                      ) : (
+                        <GlobeIcon />
+                      )}
+                    </a>
+                  );
+                })}
             </div>
           )}
         </div>
