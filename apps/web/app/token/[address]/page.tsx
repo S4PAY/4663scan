@@ -67,7 +67,13 @@ export default async function TokenPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-        {token.isStockToken && (
+        {/* Logo display is keyed on "does a logo exist" (stock.logoPath),
+            not on isStockToken — a non-stock token can have a curated logo
+            (e.g. our own $4663) without it implying stock-verification
+            status. isStockToken still independently gates the fallback
+            monogram tile below for stock tokens that haven't been fetched
+            yet, so that behavior is unchanged. */}
+        {(token.isStockToken || token.stock?.logoPath) && (
           <TokenLogo
             logoPath={token.stock?.logoPath ?? null}
             version={token.stock?.logoFetchedAt}
@@ -81,22 +87,25 @@ export default async function TokenPage({ params, searchParams }: Props) {
         </h1>
         {/* Verified-vs-counterfeit stays the headline differentiator — kept
             visually first and unchanged; asset class is a smaller, plain
-            tag below, not another competing colored badge. */}
+            tag below, not another competing colored badge. Gated on
+            isStockToken specifically (not just "has a stock row"), so a
+            non-stock token with a curated logo never shows this. */}
         {token.isStockToken && <StockBadge ticker={token.stock?.ticker} />}
       </div>
-      {token.stock && (
-        <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-          {token.stock.companyName && <span>{token.stock.companyName}</span>}
-          {token.stock.assetClass && (
-            <span className="chip uppercase">{token.stock.assetClass}</span>
-          )}
-          {token.stock.issuerAddress && (
-            <span className="inline-flex items-center gap-1.5">
-              · issued by <AddressLink address={token.stock.issuerAddress} />
-            </span>
-          )}
-        </div>
-      )}
+      {token.stock &&
+        (token.stock.companyName || token.stock.assetClass || token.stock.issuerAddress) && (
+          <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+            {token.stock.companyName && <span>{token.stock.companyName}</span>}
+            {token.stock.assetClass && (
+              <span className="chip uppercase">{token.stock.assetClass}</span>
+            )}
+            {token.stock.issuerAddress && (
+              <span className="inline-flex items-center gap-1.5">
+                · issued by <AddressLink address={token.stock.issuerAddress} />
+              </span>
+            )}
+          </div>
+        )}
       <div className="mb-4 flex flex-wrap items-center gap-x-1 gap-y-1 text-[13px]">
         <Link href={`/address/${address}`} className="hashlink break-all">
           {checksummed}

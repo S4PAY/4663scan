@@ -268,5 +268,11 @@
     "label": "Morpho",
     "category": "other",
     "source": "robinhoodchain.blockscout.com"
+  },
+  {
+    "address": "0x89fd1b5ea79252e3ba2bc74c866a2dd30aeb02da",
+    "label": "4663scan: $4663 Token",
+    "category": "token",
+    "source": "4663scan"
   }
 ]
