@@ -3,7 +3,7 @@ import { SectionTitle } from '@/components/DataTable';
 
 export const metadata: Metadata = {
   title: 'Advertise',
-  description: 'Placements and audience for advertising on 4663scan.',
+  description: 'Placements and audience for advertising on RHEX.',
 };
 
 const PLACEMENTS = [
@@ -26,9 +26,9 @@ const PLACEMENTS = [
 export default function AdvertisePage() {
   return (
     <div className="max-w-2xl">
-      <h1 className="text-lg font-semibold">Advertise on 4663scan</h1>
+      <h1 className="text-lg font-semibold">Advertise on RHEX</h1>
       <p className="mt-2 text-[13px] text-muted">
-        4663scan is the block explorer for Robinhood Chain — read by holders, builders and
+        RHEX is the block explorer for Robinhood Chain — read by holders, builders and
         traders checking transactions, tokens and contracts on the chain day to day.
         We keep placements small, clearly labeled, and separate from data we show (no
         promoted or pay-for-rank listings — see our{' '}

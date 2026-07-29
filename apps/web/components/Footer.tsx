@@ -25,8 +25,7 @@ export async function Footer() {
             >
               {/* alt="" — see layout.tsx header for the same treatment. */}
               <img src="/mark-header.png" alt="" className="h-5 w-auto shrink-0" />
-              <span className="text-accent">4663</span>
-              <span>scan</span>
+              <span className="text-accent">RHEX</span>
             </Link>
             <p className="mt-1.5 text-xs text-muted">
               Block explorer for Robinhood Chain — blocks, transactions, tokens
@@ -37,7 +36,7 @@ export async function Footer() {
                 href="https://github.com/S4PAY/4663scan"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="4663scan on GitHub"
+                aria-label="RHEX on GitHub"
                 className="navlink"
               >
                 <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-current">
@@ -48,7 +47,7 @@ export async function Footer() {
                 href="https://x.com/4663scan"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="4663scan on X"
+                aria-label="RHEX on X"
                 className="navlink"
               >
                 <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-current">

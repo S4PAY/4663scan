@@ -8,8 +8,8 @@ import type { MetadataRoute } from 'next';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: '4663scan — Robinhood Chain explorer',
-    short_name: '4663scan',
+    name: 'RHEX — Robinhood Chain explorer',
+    short_name: 'RHEX',
     description:
       'Block explorer for Robinhood Chain (chain id 4663): blocks, transactions, tokens and tokenized stocks.',
     start_url: '/',

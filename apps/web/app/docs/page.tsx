@@ -286,7 +286,7 @@ export default function DocsPage() {
     <div className="max-w-3xl">
       <h1 className="text-lg font-semibold">API</h1>
       <p className="mt-2 text-[13px] text-muted">
-        Free, read-only REST API over 4663scan&apos;s own index — no signup,
+        Free, read-only REST API over RHEX&apos;s own index — no signup,
         no API key. This is the exact same API the site itself calls.
       </p>
 

@@ -5,7 +5,7 @@ import { apiGet } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Submit a Token',
-  description: 'Submit a token for listing on 4663scan.',
+  description: 'Submit a token for listing on RHEX.',
 };
 
 export default async function SubmitTokenPage() {

@@ -29,24 +29,24 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL('https://4663scan.io'),
   title: {
-    template: '%s · 4663scan',
-    default: '4663scan — Robinhood Chain explorer',
+    template: '%s · RHEX',
+    default: 'RHEX — Robinhood Chain explorer',
   },
   description: DESCRIPTION,
   openGraph: {
-    siteName: '4663scan',
+    siteName: 'RHEX',
     type: 'website',
-    title: '4663scan — Robinhood Chain explorer',
+    title: 'RHEX — Robinhood Chain explorer',
     description: DESCRIPTION,
-    // Native banner dimensions (2172x724) rather than the "standard" 1200x630
-    // — its own grid texture runs to the edges, so padding it to a different
-    // aspect would show a visible seam; explicit width/height lets platforms
-    // that respect them scale it correctly instead of assuming 1200x630.
-    images: [{ url: '/og-banner.png', width: 2172, height: 724 }],
+    // Native banner dimensions (1734x907) — its own grid texture runs to the
+    // edges, so padding it to a different aspect would show a visible seam;
+    // explicit width/height lets platforms that respect them scale it
+    // correctly instead of assuming 1200x630 (close to that ratio anyway).
+    images: [{ url: '/og-banner.png', width: 1734, height: 907 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '4663scan — Robinhood Chain explorer',
+    title: 'RHEX — Robinhood Chain explorer',
     description: DESCRIPTION,
     images: ['/og-banner.png'],
   },
@@ -83,8 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   preserved (not the crisp favicon cutout): only ever shown
                   on the site's own near-black background. */}
               <img src="/mark-header.png" alt="" className="h-6 w-auto shrink-0" />
-              <span className="text-accent">4663</span>
-              <span>scan</span>
+              <span className="text-accent">RHEX</span>
             </Link>
             <div className="order-3 w-full min-w-0 sm:order-2 sm:w-auto sm:flex-1">
               <SearchBar />
